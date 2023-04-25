@@ -1,8 +1,13 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #include <conio.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <iostream>
+
+
 
 int main()
 {
@@ -12,7 +17,7 @@ int main()
     FILE* file1;
     file1 = fopen("Input.txt", "r");
     if (!file1) {
-        printf("Error: cannot open file. Check name of file \n");
+        std::cout << "Error: cannot open file. Check name of file \n";
         return 1;
     }
 
@@ -39,11 +44,11 @@ int main()
 
     int i;
     while (fgets(a, length + 1, file)) {
-        printf("%s", a);
+        std::cout << a;
 
         for (i = 0; i < 7; i++) {
             if (a[i] != b[i] && a[i] != c[i] && i < 6) {
-                printf("Error at column %d: expected 'circle'\n", i);
+                std::cout << "Error at column " << i << " : expected 'circle'\n";
                 error = 1;
                 break;
             }
@@ -60,18 +65,17 @@ int main()
             if (error == 0) {
                 if (a[i] == ',') {
                     error = 1;
-                    printf("Error at column %d: expected '<space>' and "
-                           "'<double>'\n",
-                           i);
+                    std::cout << "Error at column " << i << ": expected '<space>' and '<double>'\n";
                     break;
                 }
                 if (isdigit(a[i]) == 0 && a[i] != '.') {
                     error = 1;
-                    printf("Error at column %d: expected '<double>'\n", i);
+                    std::cout << "Error at column " << i << ": expected '<double>'\n";
                     break;
                 }
                 ind_first_num_elm = i;
-            } else
+            }
+            else
                 break;
         }
 
@@ -79,17 +83,17 @@ int main()
             if (error == 0) {
                 if (a[i] == ')') {
                     error = 1;
-                    printf("Error at column %d: expected ',' and '<double>'\n",
-                           i);
+                    std::cout << "Error at column " << i << ": expected ',' and '<double>'\n";
                     break;
                 }
                 if (isdigit(a[i]) == 0 && a[i] != '.') {
                     error = 1;
-                    printf("Error at column %d: expected '<double>'\n", i);
+                    std::cout << "Error at column " << i << ": expected '<double>'\n";
                     break;
                 }
                 ind_second_num_elm = i;
-            } else
+            }
+            else
                 break;
         }
 
@@ -99,11 +103,12 @@ int main()
                     if (a[i] == ')' || a[i] == '(' || a[i] == ' ')
                         break;
                     error = 1;
-                    printf("Error at column %d: expected '<double>'\n", i);
+                    std::cout << "Error at column " << i << ": expected '<double>'\n";
                     break;
                 }
                 ind_last_num_elm = i;
-            } else
+            }
+            else
                 break;
         }
 
@@ -111,11 +116,13 @@ int main()
             if (error == 0) {
                 if (a[i] != ')') {
                     error = 1;
-                    printf("Error at column %d: expected ')'\n", i);
-                } else
+                    std::cout << "Error at column " << i << ": expected ')'\n";
+                }
+                else
                     ind_close_bracket = i;
                 break;
-            } else
+            }
+            else
                 break;
         }
 
@@ -127,18 +134,19 @@ int main()
 
                 if (a[i] != ' ') {
                     error = 1;
-                    printf("Error at column %d: unexpected token\n", i);
+                    std::cout << "Error at column " << i << ": unexpected token\n";
                     break;
                 }
-            } else {
+            }
+            else {
                 break;
             }
         }
 
         if (error == 0)
-            printf("No Errors!\n");
+            std::cout << "No Errors!\n";
         error = 0;
-        printf("\n");
+        std::cout << std::endl;
     }
     return 0;
 }
