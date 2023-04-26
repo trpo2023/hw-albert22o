@@ -4,7 +4,12 @@
 
 class Figure {};
 
-class Curcle {};
+struct Curcle {
+    int _number;
+    float _radius;
+    float _point_x;
+    float _point_y;
+};
 class Triangle {};
 class Polygon {};
 
@@ -18,9 +23,7 @@ int SkipSpace(std::string& line)
     } // Если символ кустой - Мы его пропускаем и увеличиваем счетчик на 1
     return count; // Возвращаем количество пустых символов
 }
-
-// Проверяет на равество не зависимо от регистра (проверять слово в нижнем
-// регистре)
+// Проверяет на равество не зависимо от регистра (проверять слово в нижнем регистре)
 bool Compare(std::string word1, std::string& line, int& errorind)
 {
     int size = word1.length();                // Размер слова
@@ -34,7 +37,23 @@ bool Compare(std::string word1, std::string& line, int& errorind)
     }
     return false; // Иначе - false
 }
-
+// Проверяет строку на число и получет его
+bool GetDigit(std::string& line, int& errorind, float& digit)
+{
+    std::string digitstr;
+    bool pointexist = false;
+    if (!isdigit(line[0]))
+        return false;
+    while ((isdigit(line[0]) || ((line[0] == '.') && (!pointexist)))) {
+        if (line[0] == '.')
+            pointexist = true;
+        digitstr += line[0];
+        errorind++;
+        line.erase(0, 1);
+    }
+    digit = std::stod(digitstr);
+    return true;
+}
 // Проверяет тип фигуры
 int CheckFigure(std::string& line, int& errorind)
 {
@@ -46,12 +65,30 @@ int CheckFigure(std::string& line, int& errorind)
         return 3;
     return 0; // возвращает 0 Если фигура не нашлась
 }
+// Рисует указатель на ошибку
 void ErrorMark(int errorind)
 {
     for (int i = 0; i < errorind; i++)
         std::cout << " ";
     std::cout << "^" << std::endl;
 }
+// Вывод сообщения об ошибке по её номеру
+void Errorout(int numerror,int errorind){
+    ErrorMark(errorind);
+    std::cout << "Error in colomn " << errorind;
+    if (numerror == 1)
+        std::cout << ": can not detect figure \n";
+    if (numerror == 2)
+        std::cout << ": expected '(' \n";
+    if (numerror == 3)
+        std::cout << ": expected <float> \n";
+    if (numerror == 4)
+        std::cout << ": expected ',' \n";
+    if (numerror == 5)
+        std::cout << ": expected ')' \n";
+    std::cout << std::endl;
+}
+
 int main()
 {
     int errorind = 0;   // Индекс ошибки
@@ -59,10 +96,7 @@ int main()
 
     file.open("Input.txt"); // Открываемм файл
     if (!file.is_open()) {  // Если файла не существет
-        std::cout
-                << "Error: cannot open file. Check name of file \n"; // Выводим
-                                                                     // человекопонятное
-                                                                     // сообщение
+        std::cout << "Error: cannot open file. Check name of file \n"; // Выводим человекопонятное сообщение
         return 1; // И возвращаем ошибку
     }
     std::string line; // Строка из файла для проверки
@@ -73,24 +107,43 @@ int main()
         errorind += SkipSpace(line);
         int figure = CheckFigure(line, errorind); // Тип фигуры
         if (figure == 0) { // Если фигура не найдена
-            ErrorMark(errorind);
-            std::cout
-                    << "Error in colomn " << errorind
-                    << ": can not detect figure \n"; // Выводим человекопонятное
-                                                     // сообщение
-            continue; // И переходим к следующей строке
+            Errorout(1, errorind); 
+            continue; 
         }
         errorind += SkipSpace(line);
         if (!Compare("(", line, errorind)) {
-            ErrorMark(errorind);
-            std::cout << "Error in colomn " << errorind
-                      << ": expected '(' \n"; // Выводим человекопонятное
-                                              // сообщение
-            continue; // И переходим к следующей строке
+            Errorout(2, errorind);
+            continue; 
         }
         if (figure == 1) {
+            Curcle curcle;
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, curcle._point_x)) {
+                Errorout(3, errorind);
+                continue; 
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, curcle._point_y)) {
+                Errorout(3, errorind);
+                continue; 
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue; 
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, curcle._radius)) {
+                Errorout(3, errorind);
+                continue; 
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(")", line, errorind)) {
+                Errorout(5, errorind);
+                continue; 
+            }
         }
-        std::cout << "No Errors!\n";
+        std::cout << "No Errors!\n\n";
     }
     file.close();
     return 0;
