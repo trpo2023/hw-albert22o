@@ -10,7 +10,23 @@ struct Curcle {
     float _point_x;
     float _point_y;
 };
-class Triangle {};
+struct Triangle {
+    int _number;
+    float _point_1_x;
+    float _point_1_y;
+    float _point_2_x;
+    float _point_2_y;
+    float _point_3_x;
+    float _point_3_y;
+    float _point_4_x;
+    float _point_4_y;
+    bool IsCloses()
+    {
+        if ((_point_1_x != _point_4_x) || (_point_1_y != _point_4_y))
+            return false;
+        return true;
+    }
+};
 class Polygon {};
 
 // Пропускает пустые символы
@@ -23,7 +39,8 @@ int SkipSpace(std::string& line)
     } // Если символ кустой - Мы его пропускаем и увеличиваем счетчик на 1
     return count; // Возвращаем количество пустых символов
 }
-// Проверяет на равество не зависимо от регистра (проверять слово в нижнем регистре)
+// Проверяет на равество не зависимо от регистра (проверять слово в нижнем
+// регистре)
 bool Compare(std::string word1, std::string& line, int& errorind)
 {
     int size = word1.length();                // Размер слова
@@ -41,12 +58,15 @@ bool Compare(std::string word1, std::string& line, int& errorind)
 bool GetDigit(std::string& line, int& errorind, float& digit)
 {
     std::string digitstr;
-    bool pointexist = false;
-    if (!isdigit(line[0]))
+    bool pointexist = false, minusexist = false;
+    if (!isdigit(line[0]) && line[0] != '-')
         return false;
-    while ((isdigit(line[0]) || ((line[0] == '.') && (!pointexist)))) {
+    while ((isdigit(line[0]) || ((line[0] == '-') && (!minusexist))
+            || ((line[0] == '.') && (!pointexist)))) {
         if (line[0] == '.')
             pointexist = true;
+        if (line[0] == '-')
+            minusexist = true;
         digitstr += line[0];
         errorind++;
         line.erase(0, 1);
@@ -73,7 +93,8 @@ void ErrorMark(int errorind)
     std::cout << "^" << std::endl;
 }
 // Вывод сообщения об ошибке по её номеру
-void Errorout(int numerror,int errorind){
+void Errorout(int numerror, int errorind)
+{
     ErrorMark(errorind);
     std::cout << "Error in colomn " << errorind;
     if (numerror == 1)
@@ -96,51 +117,131 @@ int main()
 
     file.open("Input.txt"); // Открываемм файл
     if (!file.is_open()) {  // Если файла не существет
-        std::cout << "Error: cannot open file. Check name of file \n"; // Выводим человекопонятное сообщение
+        std::cout
+                << "Error: cannot open file. Check name of file \n"; // Выводим
+                                                                     // человекопонятное
+                                                                     // сообщение
         return 1; // И возвращаем ошибку
     }
     std::string line; // Строка из файла для проверки
     while (getline(file, line)) { // Построчно проверяем файл
         errorind = 0;
         std::cout << line << std::endl;
-        size_t pos = 0; // Указатель на позицию
         errorind += SkipSpace(line);
         int figure = CheckFigure(line, errorind); // Тип фигуры
         if (figure == 0) { // Если фигура не найдена
-            Errorout(1, errorind); 
-            continue; 
+            Errorout(1, errorind);
+            continue;
         }
         errorind += SkipSpace(line);
         if (!Compare("(", line, errorind)) {
             Errorout(2, errorind);
-            continue; 
+            continue;
         }
         if (figure == 1) {
             Curcle curcle;
             errorind += SkipSpace(line);
             if (!GetDigit(line, errorind, curcle._point_x)) {
                 Errorout(3, errorind);
-                continue; 
+                continue;
             }
             errorind += SkipSpace(line);
             if (!GetDigit(line, errorind, curcle._point_y)) {
                 Errorout(3, errorind);
-                continue; 
+                continue;
             }
             errorind += SkipSpace(line);
             if (!Compare(",", line, errorind)) {
                 Errorout(4, errorind);
-                continue; 
+                continue;
             }
             errorind += SkipSpace(line);
             if (!GetDigit(line, errorind, curcle._radius)) {
                 Errorout(3, errorind);
-                continue; 
+                continue;
             }
             errorind += SkipSpace(line);
             if (!Compare(")", line, errorind)) {
                 Errorout(5, errorind);
-                continue; 
+                continue;
+            }
+        }
+        if (figure == 2) {
+            Triangle triangle;
+            errorind += SkipSpace(line);
+            if (!Compare("(", line, errorind)) {
+                Errorout(2, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_1_x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_1_y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_2_x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_2_y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_3_x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_3_y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_4_x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, triangle._point_4_y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!triangle.IsCloses()) {
+                std::cout << "First and last points must be equal!\n";
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(")", line, errorind)) {
+                Errorout(5, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(")", line, errorind)) {
+                Errorout(5, errorind);
+                continue;
             }
         }
         std::cout << "No Errors!\n\n";
