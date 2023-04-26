@@ -2,14 +2,15 @@
 #include <iostream>
 #include <string>
 
-class Figure {};
-
-struct Curcle {
+struct Circle {
     int _number;
     float _radius;
     float _point_x;
     float _point_y;
 };
+
+struct Circles {};
+
 struct Triangle {
     int _number;
     float _point_1_x;
@@ -119,8 +120,8 @@ int main()
     if (!file.is_open()) {  // Если файла не существет
         std::cout
                 << "Error: cannot open file. Check name of file \n"; // Выводим
-                                                                     // человекопонятное
-                                                                     // сообщение
+        // человекопонятное
+        // сообщение
         return 1; // И возвращаем ошибку
     }
     std::string line; // Строка из файла для проверки
@@ -139,14 +140,14 @@ int main()
             continue;
         }
         if (figure == 1) {
-            Curcle curcle;
+            Circle circle;
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, curcle._point_x)) {
+            if (!GetDigit(line, errorind, circle._point_x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, curcle._point_y)) {
+            if (!GetDigit(line, errorind, circle._point_y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -156,7 +157,7 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, curcle._radius)) {
+            if (!GetDigit(line, errorind, circle._radius)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -244,7 +245,6 @@ int main()
                 continue;
             }
         }
-        std::cout << "No Errors!\n\n";
     }
     file.close();
     return 0;
