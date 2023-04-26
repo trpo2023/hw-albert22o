@@ -1,6 +1,4 @@
-﻿#define _CRT_SECURE_NO_WARNINGS
-
-#include <fstream>
+﻿#include <fstream>
 #include <iostream>
 #include <string>
 
@@ -29,16 +27,16 @@ bool Compare(std::string word1, std::string& line, int& errorind)
     std::string word2 = line.substr(0, size); // Вырезает слово из строки
     for (char x : word2)
         x = tolower(x); // Переводит его в нижний регистр
-    if (word1 == word2) {        // Если слова равны
-        line.erase(0, size + 1); // то удаляет слово
-        errorind += size; // Увеличивает индекс ошибки
-        return true;      // и возвращает true
+    if (word1 == word2) {    // Если слова равны
+        line.erase(0, size); // то удаляет слово
+        errorind += size;    // Увеличивает индекс ошибки
+        return true;         // и возвращает true
     }
     return false; // Иначе - false
 }
 
 // Проверяет тип фигуры
-int CheckFigure(std::string line, int& errorind)
+int CheckFigure(std::string& line, int& errorind)
 {
     if (Compare("circle", line, errorind))
         return 1;
@@ -48,7 +46,12 @@ int CheckFigure(std::string line, int& errorind)
         return 3;
     return 0; // возвращает 0 Если фигура не нашлась
 }
-
+void ErrorMark(int errorind)
+{
+    for (int i = 0; i < errorind; i++)
+        std::cout << " ";
+    std::cout << "^" << std::endl;
+}
 int main()
 {
     int errorind = 0;   // Индекс ошибки
@@ -70,6 +73,7 @@ int main()
         errorind += SkipSpace(line);
         int figure = CheckFigure(line, errorind); // Тип фигуры
         if (figure == 0) { // Если фигура не найдена
+            ErrorMark(errorind);
             std::cout
                     << "Error in colomn " << errorind
                     << ": can not detect figure \n"; // Выводим человекопонятное
@@ -78,11 +82,15 @@ int main()
         }
         errorind += SkipSpace(line);
         if (!Compare("(", line, errorind)) {
+            ErrorMark(errorind);
             std::cout << "Error in colomn " << errorind
                       << ": expected '(' \n"; // Выводим человекопонятное
                                               // сообщение
             continue; // И переходим к следующей строке
         }
+        if (figure == 1) {
+        }
+        std::cout << "No Errors!\n";
     }
     file.close();
     return 0;
