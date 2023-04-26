@@ -1,152 +1,89 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 
-#include <conio.h>
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+#include <fstream>
 #include <iostream>
+#include <string>
 
+class Figure {};
 
+class Curcle {};
+class Triangle {};
+class Polygon {};
+
+// Пропускает пустые символы
+int SkipSpace(std::string& line)
+{
+    int count = 0; // Счетчик для символов
+    while (line[0] == ' ') {
+        line.erase(0, 1);
+        count++;
+    } // Если символ кустой - Мы его пропускаем и увеличиваем счетчик на 1
+    return count; // Возвращаем количество пустых символов
+}
+
+// Проверяет на равество не зависимо от регистра (проверять слово в нижнем
+// регистре)
+bool Compare(std::string word1, std::string& line, int& errorind)
+{
+    int size = word1.length();                // Размер слова
+    std::string word2 = line.substr(0, size); // Вырезает слово из строки
+    for (char x : word2)
+        x = tolower(x); // Переводит его в нижний регистр
+    if (word1 == word2) {        // Если слова равны
+        line.erase(0, size + 1); // то удаляет слово
+        errorind += size; // Увеличивает индекс ошибки
+        return true;      // и возвращает true
+    }
+    return false; // Иначе - false
+}
+
+// Проверяет тип фигуры
+int CheckFigure(std::string line, int& errorind)
+{
+    if (Compare("circle", line, errorind))
+        return 1;
+    if (Compare("triangle", line, errorind))
+        return 2;
+    if (Compare("polygon", line, errorind))
+        return 3;
+    return 0; // возвращает 0 Если фигура не нашлась
+}
 
 int main()
 {
-    int ind_open_bracket = 0, ind_close_bracket = 0, ind_last_num_elm = 0,
-        ind_first_num_elm = 0, ind_second_num_elm = 0, error = 0;
-    // Open file, if couldn't - output mistake
-    FILE* file1;
-    file1 = fopen("Input.txt", "r");
-    if (!file1) {
-        std::cout << "Error: cannot open file. Check name of file \n";
-        return 1;
+    int errorind = 0;   // Индекс ошибки
+    std::ifstream file; // Файл для проверки
+
+    file.open("Input.txt"); // Открываемм файл
+    if (!file.is_open()) {  // Если файла не существет
+        std::cout
+                << "Error: cannot open file. Check name of file \n"; // Выводим
+                                                                     // человекопонятное
+                                                                     // сообщение
+        return 1; // И возвращаем ошибку
     }
-
-    int length = 0, element = 0;
-    while (true) {
-        element = fgetc(file1);
-        if (element == EOF)
-            if (feof(file1) != 0)
-                break;
-        length++;
+    std::string line; // Строка из файла для проверки
+    while (getline(file, line)) { // Построчно проверяем файл
+        errorind = 0;
+        std::cout << line << std::endl;
+        size_t pos = 0; // Указатель на позицию
+        errorind += SkipSpace(line);
+        int figure = CheckFigure(line, errorind); // Тип фигуры
+        if (figure == 0) { // Если фигура не найдена
+            std::cout
+                    << "Error in colomn " << errorind
+                    << ": can not detect figure \n"; // Выводим человекопонятное
+                                                     // сообщение
+            continue; // И переходим к следующей строке
+        }
+        errorind += SkipSpace(line);
+        if (!Compare("(", line, errorind)) {
+            std::cout << "Error in colomn " << errorind
+                      << ": expected '(' \n"; // Выводим человекопонятное
+                                              // сообщение
+            continue; // И переходим к следующей строке
+        }
     }
-
-    fclose(file1);
-
-    char b[] = "circle";
-    char c[] = "CIRCLE";
-    char* a;
-    a = (char*)(malloc(length * sizeof(char)));
-    FILE* file;
-    file = fopen("Input.txt", "r");
-
-    if (length == 0)
-        return 1;
-
-    int i;
-    while (fgets(a, length + 1, file)) {
-        std::cout << a;
-
-        for (i = 0; i < 7; i++) {
-            if (a[i] != b[i] && a[i] != c[i] && i < 6) {
-                std::cout << "Error at column " << i << " : expected 'circle'\n";
-                error = 1;
-                break;
-            }
-            ind_open_bracket = i;
-        }
-
-        for (i = 0; i < length; i++) {
-            if (a[i] == ')')
-                ind_close_bracket = i;
-            else
-                ind_close_bracket = length - 1;
-        }
-        for (i = ind_open_bracket + 1; a[i] != ' '; i++) {
-            if (error == 0) {
-                if (a[i] == ',') {
-                    error = 1;
-                    std::cout << "Error at column " << i << ": expected '<space>' and '<double>'\n";
-                    break;
-                }
-                if (isdigit(a[i]) == 0 && a[i] != '.') {
-                    error = 1;
-                    std::cout << "Error at column " << i << ": expected '<double>'\n";
-                    break;
-                }
-                ind_first_num_elm = i;
-            }
-            else
-                break;
-        }
-
-        for (i = ind_first_num_elm + 2; a[i] != ','; i++) {
-            if (error == 0) {
-                if (a[i] == ')') {
-                    error = 1;
-                    std::cout << "Error at column " << i << ": expected ',' and '<double>'\n";
-                    break;
-                }
-                if (isdigit(a[i]) == 0 && a[i] != '.') {
-                    error = 1;
-                    std::cout << "Error at column " << i << ": expected '<double>'\n";
-                    break;
-                }
-                ind_second_num_elm = i;
-            }
-            else
-                break;
-        }
-
-        for (i = ind_second_num_elm + 3; i < ind_close_bracket; i++) {
-            if (error == 0) {
-                if (isdigit(a[i]) == 0 && a[i] != '.') {
-                    if (a[i] == ')' || a[i] == '(' || a[i] == ' ')
-                        break;
-                    error = 1;
-                    std::cout << "Error at column " << i << ": expected '<double>'\n";
-                    break;
-                }
-                ind_last_num_elm = i;
-            }
-            else
-                break;
-        }
-
-        for (i = ind_last_num_elm + 1; i < length; i++) {
-            if (error == 0) {
-                if (a[i] != ')') {
-                    error = 1;
-                    std::cout << "Error at column " << i << ": expected ')'\n";
-                }
-                else
-                    ind_close_bracket = i;
-                break;
-            }
-            else
-                break;
-        }
-
-        for (i = ind_close_bracket + 1; i < length; i++) {
-            if (error == 0) {
-                if (a[i] == '\n') {
-                    break;
-                }
-
-                if (a[i] != ' ') {
-                    error = 1;
-                    std::cout << "Error at column " << i << ": unexpected token\n";
-                    break;
-                }
-            }
-            else {
-                break;
-            }
-        }
-
-        if (error == 0)
-            std::cout << "No Errors!\n";
-        error = 0;
-        std::cout << std::endl;
-    }
+    file.close();
     return 0;
 }
