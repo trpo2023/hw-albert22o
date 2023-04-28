@@ -28,7 +28,10 @@ struct Triangle {
         return true;
     }
 };
-class Polygon {};
+
+class Polygon {
+    int _number;
+};
 
 // Пропускает пустые символы
 int SkipSpace(std::string& line)
@@ -111,8 +114,12 @@ void Errorout(int numerror, int errorind)
     std::cout << std::endl;
 }
 
+
+
 int main()
 {
+    Triangle newtriangle;
+    Circle newcircle;
     int errorind = 0;   // Индекс ошибки
     std::ifstream file; // Файл для проверки
 
@@ -140,14 +147,13 @@ int main()
             continue;
         }
         if (figure == 1) {
-            Circle circle;
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, circle._point_x)) {
+            if (!GetDigit(line, errorind, newcircle._point_x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, circle._point_y)) {
+            if (!GetDigit(line, errorind, newcircle._point_y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -157,7 +163,7 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, circle._radius)) {
+            if (!GetDigit(line, errorind, newcircle._radius)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -168,34 +174,18 @@ int main()
             }
         }
         if (figure == 2) {
-            Triangle triangle;
             errorind += SkipSpace(line);
             if (!Compare("(", line, errorind)) {
                 Errorout(2, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_1_x)) {
+            if (!GetDigit(line, errorind, newtriangle._point_1_x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_1_y)) {
-                Errorout(3, errorind);
-                continue;
-            }
-            errorind += SkipSpace(line);
-            if (!Compare(",", line, errorind)) {
-                Errorout(4, errorind);
-                continue;
-            }
-            errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_2_x)) {
-                Errorout(3, errorind);
-                continue;
-            }
-            errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_2_y)) {
+            if (!GetDigit(line, errorind, newtriangle._point_1_y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -205,12 +195,12 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_3_x)) {
+            if (!GetDigit(line, errorind, newtriangle._point_2_x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_3_y)) {
+            if (!GetDigit(line, errorind, newtriangle._point_2_y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -220,17 +210,32 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_4_x)) {
+            if (!GetDigit(line, errorind, newtriangle._point_3_x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, triangle._point_4_y)) {
+            if (!GetDigit(line, errorind, newtriangle._point_3_y)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!triangle.IsCloses()) {
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newtriangle._point_4_x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newtriangle._point_4_y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!newtriangle.IsCloses()) {
                 std::cout << "First and last points must be equal!\n";
                 continue;
             }
@@ -244,6 +249,9 @@ int main()
                 Errorout(5, errorind);
                 continue;
             }
+        }
+        if (figure == 3) {
+            
         }
     }
     file.close();
