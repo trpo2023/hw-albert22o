@@ -1,38 +1,95 @@
-﻿#include <fstream>
+﻿#define _USE_MATH_DEFINES
+
+#include <cmath>
+#include <fstream>
 #include <iostream>
 #include <string>
+#include <vector>
 
-struct Circle {
-    int _number;
-    float _radius;
-    float _point_x;
-    float _point_y;
+struct Point {
+    float x, y;
 };
 
-struct Circles {};
-
-struct Triangle {
-    int _number;
-    float _point_1_x;
-    float _point_1_y;
-    float _point_2_x;
-    float _point_2_y;
-    float _point_3_x;
-    float _point_3_y;
-    float _point_4_x;
-    float _point_4_y;
-    bool IsCloses()
+struct Circle {
+    int number;
+    float radius;
+    Point point;
+    float GetPerimeter()
     {
-        if ((_point_1_x != _point_4_x) || (_point_1_y != _point_4_y))
-            return false;
-        return true;
+        return 2 * M_PI * radius;
+    }
+    float GetArea()
+    {
+        return (pow(radius, 2)) * M_PI;
     }
 };
 
+struct Circles {
+    std::vector<Circle> circles;
+    int i = 0;
+    void AddCircle(Circle circle)
+    {
+        i++;
+        circle.number = i;
+        circles.push_back(circle);
+    }
+};
+
+struct Triangle {
+    int _number;
+    Point point1;
+    Point point2;
+    Point point3;
+    Point point4;
+    bool IsCloses()
+    {
+        if ((point1.x != point4.x) || (point1.y != point4.y))
+            return false;
+        return true;
+    }
+    float GetArea()
+    {
+        return 0.5
+                * abs((point2.x - point1.x) * (point3.y - point1.y)
+                      - (point3.x - point1.x) * (point2.y - point1.y));
+    }
+    float GetPerimeter()
+    {
+        float AB, BC, AC;
+        AB = sqrt(
+                pow((point2.x - point1.x), 2) + pow((point2.y - point1.y), 2));
+        BC = sqrt(
+                pow((point3.x - point2.x), 2) + pow((point3.y - point2.y), 2));
+        AC = sqrt(
+                pow((point3.x - point1.x), 2) + pow((point3.y - point1.y), 2));
+        return AB + BC + AC;
+    }
+};
+
+struct Triangles {
+    std::vector<Triangle> triangles;
+    int i = 0;
+    void AddCircle(Triangle triangle)
+    {
+        i++;
+        triangle._number = i;
+        triangles.push_back(triangle);
+    }
+};
 class Polygon {
     int _number;
 };
 
+// Проверяет, пересекаются ли фигуры
+bool Intersect(Circle circle1, Circle circle2)
+{
+    float distance
+            = sqrt(pow((circle1.point.x - circle2.point.x), 2)
+                   + pow((circle1.point.y - circle2.point.y), 2));
+    if (distance <= (circle1.radius + circle2.radius))
+        return true;
+    return false;
+}
 // Пропускает пустые символы
 int SkipSpace(std::string& line)
 {
@@ -111,10 +168,7 @@ void Errorout(int numerror, int errorind)
         std::cout << ": expected ',' \n";
     if (numerror == 5)
         std::cout << ": expected ')' \n";
-    std::cout << std::endl;
 }
-
-
 
 int main()
 {
@@ -148,12 +202,12 @@ int main()
         }
         if (figure == 1) {
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newcircle._point_x)) {
+            if (!GetDigit(line, errorind, newcircle.point.x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newcircle._point_y)) {
+            if (!GetDigit(line, errorind, newcircle.point.y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -163,7 +217,7 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newcircle._radius)) {
+            if (!GetDigit(line, errorind, newcircle.radius)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -172,6 +226,9 @@ int main()
                 Errorout(5, errorind);
                 continue;
             }
+            std::cout << "area = " << newcircle.GetArea() << std::endl;
+            std::cout << "perimeter = " << newcircle.GetPerimeter()
+                      << std::endl;
         }
         if (figure == 2) {
             errorind += SkipSpace(line);
@@ -180,27 +237,12 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_1_x)) {
+            if (!GetDigit(line, errorind, newtriangle.point1.x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_1_y)) {
-                Errorout(3, errorind);
-                continue;
-            }
-            errorind += SkipSpace(line);
-            if (!Compare(",", line, errorind)) {
-                Errorout(4, errorind);
-                continue;
-            }
-            errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_2_x)) {
-                Errorout(3, errorind);
-                continue;
-            }
-            errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_2_y)) {
+            if (!GetDigit(line, errorind, newtriangle.point1.y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -210,12 +252,12 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_3_x)) {
+            if (!GetDigit(line, errorind, newtriangle.point2.x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_3_y)) {
+            if (!GetDigit(line, errorind, newtriangle.point2.y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -225,12 +267,27 @@ int main()
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_4_x)) {
+            if (!GetDigit(line, errorind, newtriangle.point3.x)) {
                 Errorout(3, errorind);
                 continue;
             }
             errorind += SkipSpace(line);
-            if (!GetDigit(line, errorind, newtriangle._point_4_y)) {
+            if (!GetDigit(line, errorind, newtriangle.point3.y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newtriangle.point4.x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newtriangle.point4.y)) {
                 Errorout(3, errorind);
                 continue;
             }
@@ -249,9 +306,12 @@ int main()
                 Errorout(5, errorind);
                 continue;
             }
+            std::cout << "area = " << newtriangle.GetArea() << std::endl;
+            std::cout << "perimeter = " << newtriangle.GetPerimeter()
+                      << std::endl;
+            std::cout << "intersects:" << std::endl;
         }
         if (figure == 3) {
-            
         }
     }
     file.close();
