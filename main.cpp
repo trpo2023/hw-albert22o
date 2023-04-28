@@ -3,8 +3,8 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <stack>
 #include <string>
-#include <vector>
 
 struct Point {
     float x, y;
@@ -25,13 +25,23 @@ struct Circle {
 };
 
 struct Circles {
-    std::vector<Circle> circles;
+    std::stack<Circle> circles;
     int i = 0;
     void AddCircle(Circle circle)
     {
         i++;
         circle.number = i;
-        circles.push_back(circle);
+        circles.push(circle);
+    }
+    bool IsEmpty()
+    {
+        return (circles.size() == 0);
+    }
+    Circle GetCircle()
+    {
+        Circle circle = circles.top();
+        circles.pop();
+        return circle;
     }
 };
 
@@ -67,28 +77,210 @@ struct Triangle {
 };
 
 struct Triangles {
-    std::vector<Triangle> triangles;
+    std::stack<Triangle> triangles;
     int i = 0;
     void AddCircle(Triangle triangle)
     {
         i++;
         triangle._number = i;
-        triangles.push_back(triangle);
+        triangles.push(triangle);
+    }
+    bool IsEmpty()
+    {
+        return (triangles.size() == 0);
+    }
+    Triangle GetTriangle()
+    {
+        Triangle triangle = triangles.top();
+        triangles.pop();
+        return triangle;
     }
 };
-class Polygon {
+
+struct Polygon {
     int _number;
 };
 
+// Вычисяет расстояние от отрезка до точки
+float Distance(Point point, Point start, Point end)
+{
+    float x1 = start.x, y1 = start.y;
+    float x2 = end.x, y2 = end.y;
+    float x = point.x, y = point.y;
+
+    // вычисляем длину отрезка
+    float length = std::sqrt(std::pow(x2 - x1, 2) + std::pow(y2 - y1, 2));
+
+    // если длина отрезка равна нулю, возвращаем расстояние до начальной точки
+    if (length == 0) {
+        return std::sqrt(std::pow(x - x1, 2) + std::pow(y - y1, 2));
+    }
+
+    // вычисляем параметр t, который задает ближайшую точку отрезка к точке
+    float t = ((x - x1) * (x2 - x1) + (y - y1) * (y2 - y1))
+            / std::pow(length, 2);
+
+    // если t находится между 0 и 1, ближайшая точка находится на отрезке
+    if (0 <= t && t <= 1) {
+        Point closest_point = {x1 + t * (x2 - x1), y1 + t * (y2 - y1)};
+        return std::sqrt(
+                std::pow(x - closest_point.x, 2)
+                + std::pow(y - closest_point.y, 2));
+    }
+
+    // если t меньше 0, ближайшая точка находится на прямой продолжении отрезка
+    // за начальной точкой
+    if (t < 0) {
+        return std::sqrt(std::pow(x - x1, 2) + std::pow(y - y1, 2));
+    }
+
+    // если t больше 1, ближайшая точка находится на прямой продолжении отрезка
+    // за конечной точкой
+    if (t > 1) {
+        return std::sqrt(std::pow(x - x2, 2) + std::pow(y - y2, 2));
+    }
+}
+// Вычисляет Векторное произведение
+float CrossProduct(Point A, Point B, Point C)
+{
+    float ABx = B.x - A.x;
+    float ABy = B.y - A.y;
+    float ACx = C.x - A.x;
+    float ACy = C.y - A.y;
+    return ABx * ACy - ABy * ACx;
+}
+// Проверяет пересечение отрезков
+bool IntersectLines(Point A, Point B, Point C, Point D)
+{
+    float cp1 = CrossProduct(A, B, C);
+    float cp2 = CrossProduct(A, B, D);
+    float cp3 = CrossProduct(C, D, A);
+    float cp4 = CrossProduct(C, D, B);
+    return (cp1 * cp2 < 0 && cp3 * cp4 < 0);
+}
 // Проверяет, пересекаются ли фигуры
 bool Intersect(Circle circle1, Circle circle2)
 {
     float distance
             = sqrt(pow((circle1.point.x - circle2.point.x), 2)
                    + pow((circle1.point.y - circle2.point.y), 2));
-    if (distance <= (circle1.radius + circle2.radius))
-        return true;
-    return false;
+    return (distance <= (circle1.radius + circle2.radius));
+}
+bool Intersect(Triangle triangle1, Triangle triangle2)
+{
+    bool FF = IntersectLines(
+            triangle1.point1,
+            triangle1.point2,
+            triangle2.point1,
+            triangle2.point2);
+    bool FS = IntersectLines(
+            triangle1.point1,
+            triangle1.point2,
+            triangle2.point2,
+            triangle2.point3);
+    bool FT = IntersectLines(
+            triangle1.point1,
+            triangle1.point2,
+            triangle2.point3,
+            triangle2.point1);
+    bool SF = IntersectLines(
+            triangle1.point2,
+            triangle1.point3,
+            triangle2.point1,
+            triangle2.point2);
+    bool SS = IntersectLines(
+            triangle1.point2,
+            triangle1.point3,
+            triangle2.point2,
+            triangle2.point3);
+    bool ST = IntersectLines(
+            triangle1.point2,
+            triangle1.point3,
+            triangle2.point3,
+            triangle2.point1);
+    bool TF = IntersectLines(
+            triangle1.point3,
+            triangle1.point1,
+            triangle2.point1,
+            triangle2.point2);
+    bool TS = IntersectLines(
+            triangle1.point3,
+            triangle1.point1,
+            triangle2.point2,
+            triangle2.point3);
+    bool TT = IntersectLines(
+            triangle1.point3,
+            triangle1.point1,
+            triangle2.point3,
+            triangle2.point1);
+    return FF || FS || FT || SF || SS || ST || TF || TS || TT;
+}
+bool Intersect(Triangle triangle, Circle circle)
+{
+    bool F
+            = (Distance(circle.point, triangle.point1, triangle.point2)
+               <= circle.radius);
+    bool S
+            = (Distance(circle.point, triangle.point2, triangle.point3)
+               <= circle.radius);
+    bool T
+            = (Distance(circle.point, triangle.point3, triangle.point1)
+               <= circle.radius);
+    return F || S || T;
+}
+bool Intersect(Circle circle, Triangle triangle)
+{
+    bool F
+            = (Distance(circle.point, triangle.point1, triangle.point2)
+               <= circle.radius);
+    bool S
+            = (Distance(circle.point, triangle.point2, triangle.point3)
+               <= circle.radius);
+    bool T
+            = (Distance(circle.point, triangle.point3, triangle.point1)
+               <= circle.radius);
+    return F || S || T;
+}
+// Выводит пересечения
+void PrintIntersects(Circle circle, Circles circles, Triangles triangles)
+{
+    bool none = true;
+    while (!circles.IsEmpty()) {
+        Circle circle1 = circles.GetCircle();
+        if (Intersect(circle, circle1)) {
+            std::cout << circle1.number << " circle" << std::endl;
+            none = false;
+        }
+    }
+    while (!triangles.IsEmpty()) {
+        Triangle triangle1 = triangles.GetTriangle();
+        if (Intersect(circle, triangle1)) {
+            std::cout << triangle1._number << " triangle" << std::endl;
+            none = false;
+        }
+    }
+    if (none)
+        std::cout << "None" << std::endl;
+}
+void PrintIntersects(Triangle triangle, Circles circles, Triangles triangles)
+{
+    bool none = true;
+    while (!circles.IsEmpty()) {
+        Circle circle1 = circles.GetCircle();
+        if (Intersect(triangle, circle1)) {
+            std::cout << circle1.number << " circle" << std::endl;
+            none = false;
+        }
+    }
+    while (!triangles.IsEmpty()) {
+        Triangle triangle1 = triangles.GetTriangle();
+        if (Intersect(triangle, triangle1)) {
+            std::cout << triangle1._number << " triangle" << std::endl;
+            none = false;
+        }
+    }
+    if (none)
+        std::cout << "None" << std::endl;
 }
 // Пропускает пустые символы
 int SkipSpace(std::string& line)
@@ -174,6 +366,8 @@ int main()
 {
     Triangle newtriangle;
     Circle newcircle;
+    Triangles triangles;
+    Circles circles;
     int errorind = 0;   // Индекс ошибки
     std::ifstream file; // Файл для проверки
 
@@ -229,6 +423,9 @@ int main()
             std::cout << "area = " << newcircle.GetArea() << std::endl;
             std::cout << "perimeter = " << newcircle.GetPerimeter()
                       << std::endl;
+            std::cout << "intersects:" << std::endl;
+            PrintIntersects(newcircle, circles, triangles);
+            circles.AddCircle(newcircle);
         }
         if (figure == 2) {
             errorind += SkipSpace(line);
