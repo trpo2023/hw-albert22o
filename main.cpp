@@ -3,8 +3,8 @@
 #include <cmath>
 #include <fstream>
 #include <iostream>
-#include <stack>
 #include <string>
+#include <vector>
 
 struct Point {
     float x, y;
@@ -25,13 +25,13 @@ struct Circle {
 };
 
 struct Circles {
-    std::stack<Circle> circles;
+    std::vector<Circle> circles;
     int i = 0;
     void AddCircle(Circle circle)
     {
         i++;
         circle.number = i;
-        circles.push(circle);
+        circles.insert(circles.begin(), circle);
     }
     bool IsEmpty()
     {
@@ -39,14 +39,14 @@ struct Circles {
     }
     Circle GetCircle()
     {
-        Circle circle = circles.top();
-        circles.pop();
+        Circle circle = circles.back();
+        circles.pop_back();
         return circle;
     }
 };
 
 struct Triangle {
-    int _number;
+    int number;
     Point point1;
     Point point2;
     Point point3;
@@ -77,13 +77,13 @@ struct Triangle {
 };
 
 struct Triangles {
-    std::stack<Triangle> triangles;
+    std::vector<Triangle> triangles;
     int i = 0;
-    void AddCircle(Triangle triangle)
+    void AddTriangle(Triangle triangle)
     {
         i++;
-        triangle._number = i;
-        triangles.push(triangle);
+        triangle.number = i;
+        triangles.insert(triangles.begin(), triangle);
     }
     bool IsEmpty()
     {
@@ -91,14 +91,45 @@ struct Triangles {
     }
     Triangle GetTriangle()
     {
-        Triangle triangle = triangles.top();
-        triangles.pop();
+        Triangle triangle = triangles.back();
+        triangles.pop_back();
         return triangle;
     }
 };
 
 struct Polygon {
-    int _number;
+    int number;
+    std::vector<Point> points;
+    void AddPoint(Point newpoint)
+    {
+        points.push_back(newpoint);
+    }
+    bool IsCloses()
+    {
+        return ((points[0].x == (points.back()).x)
+                && (points[0].y == (points.back()).y));
+    }
+};
+
+struct Polygons {
+    std::vector<Polygon> polygons;
+    int i = 0;
+    void AddPolygon(Polygon polygon)
+    {
+        i++;
+        polygon.number = i;
+        polygons.insert(polygons.begin(), polygon);
+    }
+    bool IsEmpty()
+    {
+        return (polygons.size() == 0);
+    }
+    Polygon GetPolygon()
+    {
+        Polygon polygon = polygons.back();
+        polygons.pop_back();
+        return polygon;
+    }
 };
 
 // Вычисяет расстояние от отрезка до точки
@@ -255,7 +286,7 @@ void PrintIntersects(Circle circle, Circles circles, Triangles triangles)
     while (!triangles.IsEmpty()) {
         Triangle triangle1 = triangles.GetTriangle();
         if (Intersect(circle, triangle1)) {
-            std::cout << triangle1._number << " triangle" << std::endl;
+            std::cout << triangle1.number << " triangle" << std::endl;
             none = false;
         }
     }
@@ -275,7 +306,7 @@ void PrintIntersects(Triangle triangle, Circles circles, Triangles triangles)
     while (!triangles.IsEmpty()) {
         Triangle triangle1 = triangles.GetTriangle();
         if (Intersect(triangle, triangle1)) {
-            std::cout << triangle1._number << " triangle" << std::endl;
+            std::cout << triangle1.number << " triangle" << std::endl;
             none = false;
         }
     }
@@ -368,6 +399,9 @@ int main()
     Circle newcircle;
     Triangles triangles;
     Circles circles;
+    Point newpoint;
+    Polygon newpolygon;
+    Polygons polygons;
     int errorind = 0;   // Индекс ошибки
     std::ifstream file; // Файл для проверки
 
@@ -382,7 +416,7 @@ int main()
     std::string line; // Строка из файла для проверки
     while (getline(file, line)) { // Построчно проверяем файл
         errorind = 0;
-        std::cout << line << std::endl;
+        std::cout << std::endl << line << std::endl;
         errorind += SkipSpace(line);
         int figure = CheckFigure(line, errorind); // Тип фигуры
         if (figure == 0) { // Если фигура не найдена
@@ -507,6 +541,8 @@ int main()
             std::cout << "perimeter = " << newtriangle.GetPerimeter()
                       << std::endl;
             std::cout << "intersects:" << std::endl;
+            PrintIntersects(newtriangle, circles, triangles);
+            triangles.AddTriangle(newtriangle);
         }
         if (figure == 3) {
         }
