@@ -109,6 +109,32 @@ struct Polygon {
         return ((points[0].x == (points.back()).x)
                 && (points[0].y == (points.back()).y));
     }
+    void Clear()
+    {
+        points.clear();
+    }
+    float GetPerimeter()
+    {
+        int n = points.size();
+        float perimeter = 0;
+        for (int i = 0; i < n; i++) {
+            int j = (i + 1) % n;
+            perimeter
+                    += sqrt(pow(points[i].x - points[j].x, 2)
+                            + pow(points[i].y - points[j].y, 2));
+        }
+        return perimeter;
+    }
+    float GetArea()
+    {
+        int n = points.size();
+        float area = 0;
+        for (int i = 0; i < n; i++) {
+            int j = (i + 1) % n;
+            area += points[i].x * points[j].y - points[j].x * points[i].y;
+        }
+        return abs(area) / 2;
+    }
 };
 
 struct Polygons {
@@ -395,6 +421,7 @@ void Errorout(int numerror, int errorind)
 
 int main()
 {
+    bool mistake = false;
     Triangle newtriangle;
     Circle newcircle;
     Triangles triangles;
@@ -545,6 +572,114 @@ int main()
             triangles.AddTriangle(newtriangle);
         }
         if (figure == 3) {
+            newpolygon.Clear();
+            errorind += SkipSpace(line);
+            if (!Compare("(", line, errorind)) {
+                Errorout(2, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            newpolygon.AddPoint(newpoint);
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            newpolygon.AddPoint(newpoint);
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            newpolygon.AddPoint(newpoint);
+            errorind += SkipSpace(line);
+            if (!Compare(",", line, errorind)) {
+                Errorout(4, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.x)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!GetDigit(line, errorind, newpoint.y)) {
+                Errorout(3, errorind);
+                continue;
+            }
+            newpolygon.AddPoint(newpoint);
+            errorind += SkipSpace(line);
+            while (true) {
+                errorind += SkipSpace(line);
+                if (line[0] == ')')
+                    break;
+                if (!Compare(",", line, errorind)) {
+                    Errorout(4, errorind);
+                    mistake = true;
+                    break;
+                }
+                errorind += SkipSpace(line);
+                if (!GetDigit(line, errorind, newpoint.x)) {
+                    Errorout(3, errorind);
+                    mistake = true;
+                    break;
+                }
+                errorind += SkipSpace(line);
+                if (!GetDigit(line, errorind, newpoint.y)) {
+                    Errorout(3, errorind);
+                    mistake = true;
+                    break;
+                }
+                newpolygon.AddPoint(newpoint);
+            }
+            if (mistake)
+                continue;
+            if (!Compare(")", line, errorind)) {
+                Errorout(5, errorind);
+                continue;
+            }
+            errorind += SkipSpace(line);
+            if (!Compare(")", line, errorind)) {
+                Errorout(5, errorind);
+                continue;
+            }
+            if (!newpolygon.IsCloses()) {
+                std::cout << "First and last points must be equal!\n";
+                continue;
+            }
+            std::cout << "area = " << newpolygon.GetArea() << std::endl;
+            std::cout << "perimeter = " << newpolygon.GetPerimeter()
+                      << std::endl;
+            polygons.AddPolygon(newpolygon);
         }
     }
     file.close();
