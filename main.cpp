@@ -298,8 +298,91 @@ bool Intersect(Circle circle, Triangle triangle)
                <= circle.radius);
     return F || S || T;
 }
+bool Intersect(Polygon polygon, Circle circle)
+{
+    int n = polygon.points.size();
+    for (int i = 0; i < n - 1; i++)
+        if (Distance(circle.point, polygon.points[i], polygon.points[i + 1])
+            <= circle.radius)
+            return true;
+    return false;
+}
+bool Intersect(Circle circle, Polygon polygon)
+{
+    int n = polygon.points.size();
+    for (int i = 0; i < n - 1; i++)
+        if (Distance(circle.point, polygon.points[i], polygon.points[i + 1])
+            <= circle.radius)
+            return true;
+    return false;
+}
+bool Intersect(Triangle triangle, Polygon polygon)
+{
+    int n = polygon.points.size();
+    for (int i = 0; i < n - 1; i++) {
+        if (IntersectLines(
+                    polygon.points[i],
+                    polygon.points[i + 1],
+                    triangle.point1,
+                    triangle.point2))
+            return true;
+        if (IntersectLines(
+                    polygon.points[i],
+                    polygon.points[i + 1],
+                    triangle.point2,
+                    triangle.point3))
+            return true;
+        if (IntersectLines(
+                    polygon.points[i],
+                    polygon.points[i + 1],
+                    triangle.point3,
+                    triangle.point1))
+            return true;
+    }
+    return false;
+}
+bool Intersect(Polygon polygon, Triangle triangle)
+{
+    int n = polygon.points.size();
+    for (int i = 0; i < n - 1; i++) {
+        if (IntersectLines(
+                    polygon.points[i],
+                    polygon.points[i + 1],
+                    triangle.point1,
+                    triangle.point2))
+            return true;
+        if (IntersectLines(
+                    polygon.points[i],
+                    polygon.points[i + 1],
+                    triangle.point2,
+                    triangle.point3))
+            return true;
+        if (IntersectLines(
+                    polygon.points[i],
+                    polygon.points[i + 1],
+                    triangle.point3,
+                    triangle.point1))
+            return true;
+    }
+    return false;
+}
+bool Intersect(Polygon polygon1, Polygon polygon2)
+{
+    int n1 = polygon1.points.size();
+    int n2 = polygon2.points.size();
+    for (int i = 0; i < n1 - 1; i++)
+        for (int j = 0; j < n2 - 1; j++)
+            if (IntersectLines(
+                        polygon1.points[i],
+                        polygon1.points[i + 1],
+                        polygon2.points[j],
+                        polygon2.points[j + 1]))
+                return true;
+    return false;
+}
 // Выводит пересечения
-void PrintIntersects(Circle circle, Circles circles, Triangles triangles)
+void PrintIntersects(
+        Circle circle, Circles circles, Triangles triangles, Polygons polygons)
 {
     bool none = true;
     while (!circles.IsEmpty()) {
@@ -316,10 +399,21 @@ void PrintIntersects(Circle circle, Circles circles, Triangles triangles)
             none = false;
         }
     }
+    while (!polygons.IsEmpty()) {
+        Polygon polygon1 = polygons.GetPolygon();
+        if (Intersect(circle, polygon1)) {
+            std::cout << polygon1.number << " polygon" << std::endl;
+            none = false;
+        }
+    }
     if (none)
         std::cout << "None" << std::endl;
 }
-void PrintIntersects(Triangle triangle, Circles circles, Triangles triangles)
+void PrintIntersects(
+        Triangle triangle,
+        Circles circles,
+        Triangles triangles,
+        Polygons polygons)
 {
     bool none = true;
     while (!circles.IsEmpty()) {
@@ -336,9 +430,48 @@ void PrintIntersects(Triangle triangle, Circles circles, Triangles triangles)
             none = false;
         }
     }
+    while (!polygons.IsEmpty()) {
+        Polygon polygon1 = polygons.GetPolygon();
+        if (Intersect(triangle, polygon1)) {
+            std::cout << polygon1.number << " polygon" << std::endl;
+            none = false;
+        }
+    }
     if (none)
         std::cout << "None" << std::endl;
 }
+void PrintIntersects(
+        Polygon polygon,
+        Circles circles,
+        Triangles triangles,
+        Polygons polygons)
+{
+    bool none = true;
+    while (!circles.IsEmpty()) {
+        Circle circle1 = circles.GetCircle();
+        if (Intersect(polygon, circle1)) {
+            std::cout << circle1.number << " circle" << std::endl;
+            none = false;
+        }
+    }
+    while (!triangles.IsEmpty()) {
+        Triangle triangle1 = triangles.GetTriangle();
+        if (Intersect(polygon, triangle1)) {
+            std::cout << triangle1.number << " triangle" << std::endl;
+            none = false;
+        }
+    }
+    while (!polygons.IsEmpty()) {
+        Polygon polygon1 = polygons.GetPolygon();
+        if (Intersect(polygon, polygon1)) {
+            std::cout << polygon1.number << " polygon" << std::endl;
+            none = false;
+        }
+    }
+    if (none)
+        std::cout << "None" << std::endl;
+}
+
 // Пропускает пустые символы
 int SkipSpace(std::string& line)
 {
@@ -485,7 +618,7 @@ int main()
             std::cout << "perimeter = " << newcircle.GetPerimeter()
                       << std::endl;
             std::cout << "intersects:" << std::endl;
-            PrintIntersects(newcircle, circles, triangles);
+            PrintIntersects(newcircle, circles, triangles, polygons);
             circles.AddCircle(newcircle);
         }
         if (figure == 2) {
@@ -568,7 +701,7 @@ int main()
             std::cout << "perimeter = " << newtriangle.GetPerimeter()
                       << std::endl;
             std::cout << "intersects:" << std::endl;
-            PrintIntersects(newtriangle, circles, triangles);
+            PrintIntersects(newtriangle, circles, triangles, polygons);
             triangles.AddTriangle(newtriangle);
         }
         if (figure == 3) {
@@ -679,6 +812,8 @@ int main()
             std::cout << "area = " << newpolygon.GetArea() << std::endl;
             std::cout << "perimeter = " << newpolygon.GetPerimeter()
                       << std::endl;
+            std::cout << "Intersects:" << std::endl;
+            PrintIntersects(newpolygon, circles, triangles, polygons);
             polygons.AddPolygon(newpolygon);
         }
     }
